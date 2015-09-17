@@ -6,7 +6,7 @@
   </head>
   
   <body ng-controller="CalculatorCtrl">
-    <h1> AngularJS Calculator App </h1>
+    <h1 class="text-center"> AngularJS Calculator App </h1>
     
     <div class="calcBody">
       <div class="calcBorder">
@@ -17,15 +17,20 @@
         </p>
       </div>
       <div class="calcbuttons">
-        <button ng-repeat="button in [1,2,3,'+']" name="btn{{ button }}" class="numberbutton"
-        value="{{ button }}"> {{ button }} </button><br>
-        <button ng-repeat="button in [4,5,6,'-']" name="btn{{ button }}" class="numberbutton"
-        value="{{ button }}"> {{ button }} </button><br>
-        <button ng-repeat="button in [7,8,9, '=']" name="btn{{ button }}" class="numberbutton"
-        value="{{ button }}"> {{ button }} </button><br>
-
-        <button name="btn0" class="numberbutton" value="0" >0</button>
-        <button name="btnClear" class="clearbutton" >CLEAR</button>
+        <div class="row">
+          <div class="col-md-7">
+            <button ng-repeat="button in buttons" name="btn{{ button }}" 
+                    class="numberbutton" value="{{ button }}" 
+                    ng-click="[0,1,2,3,4,5,6,7,8,9,'.'].indexOf(button) !== -1 ? updateOutput(button) : calculate()"> {{ button }} 
+            </button>
+            <button class="btn btn-warning" id="clear" ng-click="clear()">Clear</button>
+          </div>
+          <div class="col-md-3">
+            <button ng-repeat="op in operations" name="btn{{ op.name }}"
+                    value="{{ op.symbol }}" class="operationbutton" ng-click="op.function()"> {{ op.symbol }}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
     
