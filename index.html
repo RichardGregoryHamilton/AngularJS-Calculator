@@ -8,6 +8,27 @@
   <body ng-controller="CalculatorCtrl">
     <h1> AngularJS Calculator App </h1>
     
+    <div class="calcBody">
+      <div class="calcBorder">
+        <p class="output" name="output"> 
+          {{ output }}
+          <br>
+          {{ operationToken }}
+        </p>
+      </div>
+      <div class="calcbuttons">
+        <button ng-repeat="button in [1,2,3,'+']" name="btn{{ button }}" class="numberbutton"
+        value="{{ button }}"> {{ button }} </button><br>
+        <button ng-repeat="button in [4,5,6,'-']" name="btn{{ button }}" class="numberbutton"
+        value="{{ button }}"> {{ button }} </button><br>
+        <button ng-repeat="button in [7,8,9, '=']" name="btn{{ button }}" class="numberbutton"
+        value="{{ button }}"> {{ button }} </button><br>
+
+        <button name="btn0" class="numberbutton" value="0" >0</button>
+        <button name="btnClear" class="clearbutton" >CLEAR</button>
+      </div>
+    </div>
+    
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
