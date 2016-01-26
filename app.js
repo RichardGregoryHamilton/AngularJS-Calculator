@@ -1,208 +1,166 @@
 angular.module('Calculator', [])
     .controller('CalculatorCtrl', ['$scope', function($scope) {
-        
-        $scope.buttons = [1,2,3,4,5,6,7,8,9,0,".","="];
 
-        $scope.output = "0";
+        // The buttons are ordered in standard calculator format
+        $scope.buttons = [7, 8, 9, 4, 5, 6, 1, 2, 3, 0, '.', '='];
 
-        // Used to evaluate whether to start a new number
-        // in the display and when to concatenate
+        $scope.output = '0';
         $scope.newNumber = true;
+        $scope.pendingOperation = null;            // Holds pending operation
+        $scope.token = '';                         // Displays operation in view
+        $scope.total = null;
 
-        // Holds the pending operation so calculate knows what to do
-        $scope.pendingOperation = null;
-
-        // Bound to the view to display a token indicating the current operation
-        $scope.operationToken = "";
-
-        // Holds the running total as numbers are added/subtracted
-        $scope.runningTotal = null;
-
-        // Holds the number value of the string in the display output
-        $scope.pendingValue = null;
-
-        // Tells calculate what to do when the equals buttons is clicked repeatedly
-        $scope.lastOperation = null;
+        $scope.pendingValue = null;                // Holds string value
+        $scope.lastOperation = null;               // Prevents double clicks
 
         // Constants
-        var ADD = "adding";
-        var SUBTRACT = "subtracting";
-        var ADD_TOKEN = "+";
-        var SUBTRACT_TOKEN = "-";
+        var ADD = 'adding';
+        var SUBTRACT = 'subtracting';
 
         $scope.numDigits = 0;
-        
-        /*
-         * Runs every time a number button is clicked.
-         * Updates the output display and sets newNumber flag
-         */
-         
+
+        // Displays the input typed from the calculator
+
         $scope.updateOutput = function (btn) {
-            if ($scope.output == "0" || $scope.newNumber) {
+            if ($scope.output == '0' || $scope.newNumber) {
                 $scope.output = btn;
                 $scope.newNumber = false;
-            } 
+            }
             else {
                 if ($scope.numDigits < 20) {                //Limit digits
-                    if (btn != "=") {
-                        $scope.numDigits += 1;
+                    if (btn != '=') {
+                        $scope.numDigits++;
                         $scope.output += String(btn);
                     }
                 }
             }
             $scope.pendingValue = toNumber($scope.output);
-            
+
         };
 
-        /*
-         * Runs every time the add button is clicked.
-         * If a number has been entered before the add
-         * button was clicked we set the number as a pendingValue,
-         * set ADD as a pendingOperation, and set the token. 
-         * If no number was entered but an existing calculated
-         * number is in the output display we add the last added
-         * value on to the total again.
-         */
+        function evaluateExpressions() {
+            if ($scope.pendingValue) {
+                if ($scope.total && $scope.pendingOperation == ADD) {
+                    $scope.total += $scope.pendingValue;
+                } else if ($scope.total && $scope.pendingOperation == SUBTRACT) {
+                    $scope.total -= $scope.pendingValue;
+                } else {
+                    $scope.total = $scope.pendingValue;
+                }
+            }
+        }
+
+        // This function is run for every addition operation
         $scope.add = function () {
-            if ($scope.pendingValue) {
-                if ($scope.runningTotal && $scope.pendingOperation == ADD) {
-                    $scope.runningTotal += $scope.pendingValue;
-                } else if ($scope.runningTotal && $scope.pendingOperation == SUBTRACT) {
-                    $scope.runningTotal -= $scope.pendingValue;
-                } else {
-                    $scope.runningTotal = $scope.pendingValue;
-                }
-            }
-            setOperationToken(ADD);
-            setOutput(String($scope.runningTotal));
+            evaluateExpressions();
+            setToken(ADD);
+            setOutput(String($scope.total));
             $scope.pendingOperation = ADD;
-            $scope.newNumber = true;
-            $scope.numDigits = 0;
-            $scope.pendingValue = null;
+            resetValues();
         };
 
-        /*
-         * Runs every time the subtract button is clicked.
-         * If a number has been entered before the subtract
-         * button was clicked we set the number as a pendingValue,
-         * set subtract as a pendingOperation, and set the token. 
-         * If no number was entered but an existing calculated
-         * number is in the output display we subtract the last added
-         * value from the total.
-         */
+        // This function is run for every subtraction operation
+
         $scope.subtract = function () {
-            if ($scope.pendingValue) {
-                if ($scope.runningTotal && ($scope.pendingOperation == SUBTRACT)) {
-                    $scope.runningTotal -= $scope.pendingValue;
-                } else if ($scope.runningTotal && $scope.pendingOperation == ADD) {
-                    $scope.runningTotal += $scope.pendingValue;
-                } else {
-                    $scope.runningTotal = $scope.pendingValue;
-                }
-            }
-            setOperationToken(SUBTRACT);
-            setOutput(String($scope.runningTotal));
+            evaluateExpressions();
+            setToken(SUBTRACT);
+            setOutput(String($scope.total));
             $scope.pendingOperation = SUBTRACT;
+            resetValues();
+        };
+
+        function resetValues() {
             $scope.newNumber = true;
             $scope.numDigits = 0;
             $scope.pendingValue = null;
-        };
+        }
 
          $scope.operations = [
-            { "symbol": "+", "name": "add", "function": $scope.add },
-            { "symbol": "-", "name": "subtract", "function": $scope.subtract },
+            { 'symbol': '+', 'name': 'add', 'function': $scope.add },
+            { 'symbol': '-', 'name': 'subtract', 'function': $scope.subtract },
         ]
-        
-        /*
-         * Runs when the equals (=) button is clicked. If a number has been
-         * entered before the equals button was clicked we perform the
-         * calculation based on the pendingOperation. If no number was entered
-         * but an existing calculated number is in the output display we repeat
-         * the last operation. For example, if 8+2 was entered we will
-         * continue to add 2 every time the equals button is clicked.
-         */
-        
+
+        // This function runs whenever equals sign is pressed
+
         $scope.calculate = function () {
             if (!$scope.newNumber) {
                 $scope.pendingValue = toNumber($scope.output);
                 $scope.lastValue = $scope.pendingValue;
             }
-            if ($scope.pendingOperation == ADD) {
-                $scope.runningTotal += $scope.pendingValue;
-                $scope.lastOperation = ADD;
-            } else if ($scope.pendingOperation == SUBTRACT) {
-                $scope.runningTotal -= $scope.pendingValue;
-                $scope.lastOperation = SUBTRACT;
-            } else {
-                if ($scope.lastOperation) {
-                    if ($scope.lastOperation == ADD) {
-                        if ($scope.runningTotal) {
-                            $scope.runningTotal += $scope.lastValue;
-                        } else {
-                            $scope.runningTotal = 0;
-                        }
-                    } else if ($scope.lastOperation == SUBTRACT) {
-                        if ($scope.runningTotal) {
-                            $scope.runningTotal -= $scope.lastValue;
-                        } else {
-                            $scope.runningTotal = 0;
-                        }
-                    }
-                } else {
-                    $scope.runningTotal = 0;
-                }
+            switch ($scope.pendingOperation) {
+                case ADD:
+                    $scope.total += $scope.pendingValue;
+                    $scope.lastOperation = ADD;
+                    break;
+                case SUBTRACT:
+                    $scope.total -= $scope.pendingValue;
+                    $scope.lastOperation = SUBTRACT;
+                    break;
+                default:
+                    checkOperation();
+                    break;
             }
-            setOutput($scope.runningTotal);
-            setOperationToken();
+
+            setOutput($scope.total);
+            setToken();
             $scope.pendingOperation = null;
             $scope.pendingValue = null;
         };
 
-        /* 
-         * Initializes the appropriate values
-         * when the clear button is clicked.
-         */
+        function checkOperation() {
+            if ($scope.lastOperation) {
+                switch($scope.lastOperation) {
+                    case ADD:
+                        $scope.total += ($scope.total) ? $scope.lastValue : 0;
+                        break;
+                    case SUBTRACT:
+                        $scope.total -= ($scope.total) ? $scope.lastValue : 0;
+                        break;
+                    default:
+                        $scope.total = 0;
+                }
+            } else {
+                $scope.total = 0;
+            }
+        }
+
+        // Resets the calculator
+
         $scope.clear = function () {
-            $scope.runningTotal = null;
+            $scope.total = null;
             $scope.pendingValue = null;
             $scope.pendingOperation = null;
             $scope.numDigits = 0;
-            setOutput("0");
+            setOutput('0');
         };
 
-        /* 
-         * Updates the display output and resets the
-         * newNumber flag.
-         */
-        setOutput = function (outputString) {
-            $scope.output = outputString;
+        // Updates the display output and resets the newNumber flag.
+
+        setOutput = function (string) {
+            $scope.output = string;
             $scope.newNumber = true;
         };
 
-        /* 
-         * Sets the operation token to let the user know
-         * what the pendingOperation is
-         */
-        setOperationToken = function (operation) {
-            if (operation == ADD) {
-                $scope.operationToken = ADD_TOKEN;
-            } else if (operation == SUBTRACT) {
-                $scope.operationToken = SUBTRACT_TOKEN;
-            } else {
-                $scope.operationToken = "";
+        // Sets the mathematical operation to use
+
+        setToken = function (operation) {
+            switch(operation) {
+                case ADD:
+                    $scope.token = '+';
+                    break;
+                case SUBTRACT:
+                    $scope.token = '-';
+                    break;
+                default:
+                    $scope.token = '';
+                    break;
             }
         };
 
-        /* Converts a string to a number so we can
-         * perform calculations. Simply multiplies
-         * by one to do so
-         */
-        toNumber = function (numberString) {
-            var result = 0;
-            if (numberString) {
-                result = numberString * 1;
-            }
-            return result;
+        // Converts a string to a number so we can perform calculations.
+
+        toNumber = function (string) {
+            return string ? string * 1 : 0;
         };
+
     }]);
-    

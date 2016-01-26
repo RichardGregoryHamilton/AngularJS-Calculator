@@ -8,8 +8,8 @@
   <body ng-controller="CalculatorCtrl">
     <h1 class="text-center"> AngularJS Calculator App </h1>
     
-    <div class="calcBody">
-      <div class="calcBorder">
+    <div class="calc-body">
+      <div class="calc-border">
         <p class="output" name="output"> 
           {{ output }}
           <br>
@@ -20,14 +20,14 @@
         <div class="row">
           <div class="col-md-7">
             <button ng-repeat="button in buttons" name="btn{{ button }}" 
-                    class="numberbutton" value="{{ button }}" 
+                    class="number-btn" value="{{ button }}" 
                     ng-click="[0,1,2,3,4,5,6,7,8,9,'.'].indexOf(button) !== -1 ? updateOutput(button) : calculate()"> {{ button }} 
             </button>
             <button class="btn btn-warning" id="clear" ng-click="clear()">Clear</button>
           </div>
           <div class="col-md-3">
             <button ng-repeat="op in operations" name="btn{{ op.name }}"
-                    value="{{ op.symbol }}" class="operationbutton" ng-click="op.function()"> {{ op.symbol }}
+                    value="{{ op.symbol }}" class="operation-btn" ng-click="op.function()"> {{ op.symbol }}
             </button>
           </div>
         </div>
