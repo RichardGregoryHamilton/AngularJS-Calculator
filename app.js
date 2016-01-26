@@ -16,6 +16,8 @@ angular.module('Calculator', [])
         // Constants
         var ADD = 'adding';
         var SUBTRACT = 'subtracting';
+        var MULTIPLY = 'multiplying';
+        var DIVIDE = 'dividing';
 
         $scope.numDigits = 0;
 
@@ -27,7 +29,7 @@ angular.module('Calculator', [])
                 $scope.newNumber = false;
             }
             else {
-                if ($scope.numDigits < 20) {                //Limit digits
+                if ($scope.numDigits < 18) {                //Limit digits
                     if (btn != '=') {
                         $scope.numDigits++;
                         $scope.output += String(btn);
@@ -44,6 +46,10 @@ angular.module('Calculator', [])
                     $scope.total += $scope.pendingValue;
                 } else if ($scope.total && $scope.pendingOperation == SUBTRACT) {
                     $scope.total -= $scope.pendingValue;
+                } else if ($scope.total && $scope.pendingOperation == MULTIPLY) {
+                    $scope.total *= $scope.pendingValue;
+                } else if ($scope.total && $scope.pendingOperation == DIVIDE) {
+                    $scope.total /= $scope.pendingValue;
                 } else {
                     $scope.total = $scope.pendingValue;
                 }
@@ -68,6 +74,22 @@ angular.module('Calculator', [])
             $scope.pendingOperation = SUBTRACT;
             resetValues();
         };
+        
+        $scope.multiply = function () {
+            evaluateExpressions();
+            setToken(MULTIPLY);
+            setOutput(String($scope.total));
+            $scope.pendingOperation = MULTIPLY;
+            resetValues();
+        }
+        
+        $scope.divide = function () {
+            evaluateExpressions();
+            setToken(DIVIDE);
+            setOutput(String($scope.total));
+            $scope.pendingOperation = DIVIDE;
+            resetValues();
+        }
 
         function resetValues() {
             $scope.newNumber = true;
@@ -78,6 +100,8 @@ angular.module('Calculator', [])
          $scope.operations = [
             { 'symbol': '+', 'name': 'add', 'function': $scope.add },
             { 'symbol': '-', 'name': 'subtract', 'function': $scope.subtract },
+            { 'symbol': '*', 'name': 'multiply', 'function': $scope.multiply },
+            { 'symbol': '/', 'name': 'divide', 'function': $scope.divide },
         ]
 
         // This function runs whenever equals sign is pressed
@@ -95,6 +119,14 @@ angular.module('Calculator', [])
                 case SUBTRACT:
                     $scope.total -= $scope.pendingValue;
                     $scope.lastOperation = SUBTRACT;
+                    break;
+                case MULTIPLY:
+                    $scope.total *= $scope.pendingValue;
+                    $scope.lastOperation = MULTIPLY;
+                    break;
+                case DIVIDE:
+                    $scope.total /= $scope.pendingValue;
+                    $scope.lastOperation = DIVIDE;
                     break;
                 default:
                     checkOperation();
@@ -115,6 +147,12 @@ angular.module('Calculator', [])
                         break;
                     case SUBTRACT:
                         $scope.total -= ($scope.total) ? $scope.lastValue : 0;
+                        break;
+                    case MULTIPLY:
+                        $scope.total *= ($scope.total) ? $scope.lastValue : 0;
+                        break;
+                    case DIVIDE:
+                        $scope.total /= ($scope.total) ? $scope.lastValue : 0;
                         break;
                     default:
                         $scope.total = 0;
@@ -150,6 +188,12 @@ angular.module('Calculator', [])
                     break;
                 case SUBTRACT:
                     $scope.token = '-';
+                    break;
+                case MULTIPLY:
+                    $scope.token = '*';
+                    break;
+                case DIVIDE:
+                    $scope.token = '/';
                     break;
                 default:
                     $scope.token = '';
