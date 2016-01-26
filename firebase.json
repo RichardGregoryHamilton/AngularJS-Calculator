@@ -1,0 +1,9 @@
+{
+  "firebase": "angular-calculator",
+  "public": "calculator",
+  "ignore": [
+    "firebase.json",
+    "**/.*",
+    "**/node_modules/**"
+  ]
+}
